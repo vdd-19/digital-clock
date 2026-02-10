@@ -1,53 +1,55 @@
-// Select DOM elements
-const clock = document.getElementById('clock');
-const alarmInput = document.getElementById('alarm');
-const setBtn = document.getElementById('set');
-const clearBtn = document.getElementById('clear');
-const status = document.getElementById('status');
-const sound = document.getElementById('sound');
+const clock = document.getElementById("clock");
+const alarmInput = document.getElementById("alarm");
+const setBtn = document.getElementById("set");
+const clearBtn = document.getElementById("clear");
+const statusText = document.getElementById("status");
 
-// Set your alarm sound (you can use any mp3 or wav file)
-sound.src = 'C:\Users\GCES\Downloads\jeremayjimenez-south-korea-eas-alarm-1966-422162.mp3';
+// Create audio object
+
+
 
 let alarmTime = null;
-let alarmTimeout = null;
+let alarmActive = false;
+const alarmSound = new Audio("C:\dd_web\Jailer - Rajinikanth Intro Bgm.mp3");
 
-// Function to update the clock every second
-function updateClock() {
+// Update clock every second
+setInterval(() => {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    let hours = now.getHours().toString().padStart(2, "0");
+    let minutes = now.getMinutes().toString().padStart(2, "0");
+    let seconds = now.getSeconds().toString().padStart(2, "0");
 
     clock.textContent = `${hours}:${minutes}:${seconds}`;
 
-    // Check if alarm time matches current time
-    if (alarmTime) {
-        if (`${hours}:${minutes}` === alarmTime) {
-            sound.play();
-            status.textContent = 'Alarm ringing!';
-            alarmTime = null; // Reset alarm after ringing
-        }
+    // Check alarm
+    if (alarmActive && alarmTime === `${hours}:${minutes}`) {
+        alarmSound.currentTime = 0;
+        alarmSound.play().catch(err => console.error("Failed to play alarm sound:", err));
+        statusText.textContent = "⏰ alarm ringing!";
+        alarmActive = false;
     }
-}
-
-// Update clock every second
-setInterval(updateClock, 1000);
+}, 1000);
 
 // Set alarm
-setBtn.addEventListener('click', () => {
-    if (alarmInput.value) {
-        alarmTime = alarmInput.value;
-        status.textContent = `Alarm set for ${alarmTime}`;
-    } else {
-        alert('Please select a valid time for the alarm.');
+setBtn.addEventListener("click", () => {
+    if (alarmInput.value === "") {
+        statusText.textContent = "please set a time";
+        return;
     }
+
+    alarmTime = alarmInput.value;
+    alarmActive = true;
+    statusText.textContent = `alarm set for ${alarmTime}`;
 });
 
 // Clear alarm
-clearBtn.addEventListener('click', () => {
+clearBtn.addEventListener("click", () => {
+    alarmSound.pause();
+    alarmSound.currentTime = 0;
+
     alarmTime = null;
-    status.textContent = 'No alarm set';
-    sound.pause();
-    sound.currentTime = 0;
+    alarmActive = false;
+    alarmInput.value = "";
+    statusText.textContent = "no alarm set";
 });
